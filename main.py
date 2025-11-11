@@ -6,6 +6,7 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
+# push test
 # === 여기를 본인 값으로 채우기 ===
 TEAM_ID = "U77SWC9NZT"              # Apple Team ID
 KEY_ID = "5XFZZ6ZD2H"                # APNs Key ID
