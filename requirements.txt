@@ -3,3 +3,7 @@ httpx
 fastapi
 pydantic
 vapi_server_sdk
+sqlalchemy
+psycopg2-binary
+python-dotenv
+uvicorn

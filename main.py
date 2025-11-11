@@ -1,14 +1,9 @@
-import time
-import jwt  # pyjwt
-import httpx
 from fastapi import FastAPI
-from pydantic import BaseModel
-from push_router import router as push_router
-from vapi_router import router as vapi_router
+from routers import push, register_callee
 
 app = FastAPI()
-app.include_router(push_router)
-app.include_router(vapi_router)
+app.include_router(push.router)
+app.include_router(register_callee.router)
 
 @app.get("/")
 def health():

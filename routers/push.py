@@ -8,10 +8,8 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 
 # Create a router instance
-router = APIRouter()
+router = APIRouter(route_prefix="/push")
 
-# These would typically come from a config file, but keeping them here for now
-# to match your current structure
 TEAM_ID = "U77SWC9NZT"
 KEY_ID = "5XFZZ6ZD2H"
 BUNDLE_ID = "com.stevenkim.CallClient"
@@ -56,7 +54,7 @@ def _create_apns_jwt():
     return token
 
 
-@router.post("/push")
+@router.post("")
 async def send_push(req: PushRequest):
     jwt_token = _create_apns_jwt()
 
@@ -87,7 +85,7 @@ async def send_push(req: PushRequest):
         }
 
 
-@router.post("/voip-push")
+@router.post("/voip")
 async def send_voip_push(req: VoipPushRequest):
     jwt_token = _create_apns_jwt()
     url = f"{APNS_HOST}/3/device/{VOIP_DEVICE_TOKEN}"
