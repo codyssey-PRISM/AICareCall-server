@@ -1,0 +1,5 @@
+pyjwt
+httpx
+fastapi
+pydantic
+vapi_server_sdk
