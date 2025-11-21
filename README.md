@@ -1,6 +1,6 @@
-# APNs Push Server
+# 소리ai 백엔드 서버
 
-FastAPI 기반 iOS APNs 푸시 알림 서버 + Vapi 웹훅 + SQLite/PostgreSQL 지원
+FastAPI 기반 iOS APNs 푸시 알림 + 이메일 인증 + Vapi 웹훅 + SQLite/PostgreSQL 지원
 
 ## 📁 프로젝트 구조
 
@@ -23,23 +23,35 @@ server/
     ├── main.py            # FastAPI 앱 엔트리포인트
     │
     ├── core/              # 핵심 설정
-    │   ├── config.py      # 환경변수 관리 (DATABASE_URL 포함)
+    │   ├── config.py      # 환경변수 관리 (DATABASE_URL, Gmail SMTP 등)
     │   └── security.py    # JWT 생성
     │
     ├── db/                # 데이터베이스
     │   ├── base.py        # SQLAlchemy Base 클래스
     │   ├── session.py     # Async Engine, SessionLocal, get_db
     │   └── models/        # SQLAlchemy 모델 (DB 테이블)
-    │       └── user.py    # User 모델
+    │       ├── user.py    # User 모델
+    │       ├── elder.py   # Elder (어르신) 모델
+    │       └── call_schedule.py  # CallSchedule 모델
     │
     ├── schemas/           # Pydantic 모델 (API 요청/응답)
-    │   └── push.py        # 푸시 관련 스키마
+    │   ├── push.py        # 푸시 관련 스키마
+    │   ├── auth.py        # 인증 관련 스키마
+    │   └── elder.py       # 어르신 관련 스키마
     │
     ├── services/          # 비즈니스 로직
-    │   └── apns.py        # APNs 푸시 전송
+    │   ├── apns.py        # APNs 푸시 전송
+    │   ├── auth.py        # 인증 코드 관리 (인메모리)
+    │   ├── email.py       # Gmail SMTP 이메일 전송
+    │   └── elder.py       # 어르신 관련 로직
+    │
+    ├── templates/         # 이메일 HTML 템플릿
+    │   └── auth_code_email.html  # 인증 코드 이메일
     │
     └── routers/           # API 엔드포인트
+        ├── auth.py        # /auth (이메일 인증)
         ├── push.py        # /push, /push/voip
+        ├── elders.py      # /elders (어르신 관리)
         ├── webhook.py     # /vapi/webhook
         └── health.py      # /, /health
 ```
@@ -84,6 +96,12 @@ DATABASE_URL=sqlite+aiosqlite:///./data/app.db
 # PostgreSQL로 전환 시:
 # DATABASE_URL=postgresql+asyncpg://user:password@localhost/dbname
 
+# 이메일 (Gmail SMTP)
+EMAIL_FROM=your-email@gmail.com
+GMAIL_APP_PASSWORD=your_gmail_app_password
+SMTP_SERVER=smtp.gmail.com
+SMTP_PORT=587
+
 # 서버 설정
 DEBUG=True
 ```
@@ -122,6 +140,27 @@ GET http://localhost:8000/
 GET http://localhost:8000/health
 ```
 
+### 이메일 인증
+
+```bash
+# 인증 코드 요청 (이메일로 6자리 코드 전송)
+POST http://localhost:8000/auth/code
+Content-Type: application/json
+
+{
+  "email": "user@example.com"
+}
+
+# 인증 코드 검증 (성공 시 User 생성 또는 조회)
+POST http://localhost:8000/auth/verify
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "code": "123456"
+}
+```
+
 ### 일반 알림 푸시
 
 ```bash
@@ -142,6 +181,23 @@ Content-Type: application/json
 
 {
   "ai_call_id": "call_123"
+}
+```
+
+### 어르신 관리
+
+```bash
+# 어르신 목록 조회
+GET http://localhost:8000/elders
+
+# 어르신 등록
+POST http://localhost:8000/elders
+Content-Type: application/json
+
+{
+  "name": "홍길동",
+  "relationship": "부모님",
+  "phone": "010-1234-5678"
 }
 ```
 
@@ -176,12 +232,30 @@ Content-Type: application/json
 
 ### 모델
 
-#### User
+#### User (보호자)
 
 - `id`: Integer (Primary Key)
 - `email`: String (Unique, Indexed)
 - `created_at`: DateTime
 - `updated_at`: DateTime
+
+#### Elder (어르신)
+
+- `id`: Integer (Primary Key)
+- `guardian_id`: Integer (FK → users)
+- `name`: String
+- `relationship`: String
+- `phone`: String (Optional)
+- `notes`: Text (Optional)
+- `created_at`: DateTime
+
+#### CallSchedule (콜 스케줄)
+
+- `id`: Integer (Primary Key)
+- `elder_id`: Integer (FK → elders)
+- `time_of_day`: Time
+- `is_active`: Boolean
+- `created_at`: DateTime
 
 ### DB 사용 예시
 
@@ -287,6 +361,38 @@ alembic current
 2. Pydantic 모델 정의
 3. 라우터에서 사용
 
+## 📧 이메일 인증 (Gmail SMTP)
+
+### Gmail 앱 비밀번호 생성
+
+1. Google 계정 → 보안
+2. 2단계 인증 활성화 (필수)
+3. "앱 비밀번호" 검색 → 생성
+4. 앱: "메일", 기기: "기타" (사용자 지정 이름)
+5. 16자리 비밀번호를 `.env`의 `GMAIL_APP_PASSWORD`에 입력
+
+### 인증 흐름
+
+1. **인증 코드 요청** (`POST /auth/code`)
+
+   - 이메일 중복 체크 (이미 가입된 이메일은 거부)
+   - 6자리 랜덤 숫자 코드 생성
+   - Gmail SMTP로 HTML 이메일 전송
+   - 인메모리 딕셔너리에 저장 (5분 유효)
+
+2. **인증 코드 검증** (`POST /auth/verify`)
+   - 코드 형식 검증 (6자리 숫자)
+   - 만료 시간 체크 (5분)
+   - 코드 일치 여부 확인
+   - 성공 시: User 테이블에 저장 + 코드 삭제 (재사용 방지)
+
+### 주요 특징
+
+- **비동기 전송**: `aiosmtplib` 사용으로 FastAPI와 완벽한 비동기 통합
+- **보안**: TLS 암호화 연결
+- **제한**: Gmail은 하루 500통 제한 (MVP에 충분)
+- **템플릿**: HTML 이메일 (`app/templates/auth_code_email.html`)
+
 ## 📝 참고사항
 
 - **APNs 환경**:
@@ -295,6 +401,8 @@ alembic current
 - **디바이스 토큰**: iOS 앱에서 출력된 토큰을 `.env`에 입력
 - **JWT 갱신**: APNs JWT는 자동으로 매 요청마다 새로 생성됨 (1시간 유효)
 - **DB 자동 생성**: 서버 시작 시 테이블 자동 생성 (개발 편의용)
+- **인증 코드 저장**: 현재는 인메모리 딕셔너리 (서버 재시작 시 초기화)
+  - 프로덕션에서는 Redis 사용 권장
 - **schemas vs models**:
   - `app/schemas/`: API 요청/응답용 Pydantic 모델
   - `app/db/models/`: DB 테이블용 SQLAlchemy 모델
@@ -304,9 +412,16 @@ alembic current
 
 - `.env` 파일은 절대 Git에 커밋하지 마세요
 - `AuthKey_*.p8` 파일도 안전하게 관리하세요
+- **Gmail 앱 비밀번호**: 절대 노출하지 마세요 (`.env`에만 보관)
 - `data/` 디렉토리는 `.gitignore`에 포함됨 (SQLite DB)
 - 프로덕션에서는 디바이스 토큰을 DB에 저장하세요
 - 프로덕션에서는 PostgreSQL 사용을 권장합니다
+- **인증 코드 보안**:
+  - 6자리 숫자 (총 1,000,000 가지 조합)
+  - 5분 만료
+  - 코드 형식 검증
+  - 재사용 방지 (사용 후 즉시 삭제)
+  - Rate Limiting 추가 권장 (프로덕션)
 
 ## 🐛 트러블슈팅
 
