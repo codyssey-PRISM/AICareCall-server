@@ -4,6 +4,7 @@ pyjwt[crypto]
 httpx[http2]
 pydantic-settings
 python-dotenv
+aiosmtplib
 
 # Database
 sqlalchemy[asyncio]>=2.0.0

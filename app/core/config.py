@@ -25,6 +25,12 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite+aiosqlite:///./data/app.db"
     # PostgreSQL로 전환 시: postgresql+asyncpg://user:password@localhost/dbname
     
+    # Email (Gmail SMTP)
+    EMAIL_FROM: str
+    GMAIL_APP_PASSWORD: str
+    SMTP_SERVER: str = "smtp.gmail.com"
+    SMTP_PORT: int = 587
+    
     @property
     def voip_topic(self) -> str:
         """VoIP 토픽 = Bundle ID + .voip"""
