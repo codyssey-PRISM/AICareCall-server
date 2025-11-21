@@ -5,7 +5,7 @@ class ElderCreate(BaseModel):
     name: str
     relationship: str
     phone: str
-    residence: str
+    residence_type: str
     health_condition: str
     begin_date: datetime
     end_date: datetime | None = None
@@ -33,6 +33,8 @@ class ElderResponse(BaseModel):
     ask_emotion: bool
     ask_special_event: bool
     additional_info: str | None
+    created_at: datetime
+    updated_at: datetime
     
     class Config:
         from_attributes = True
