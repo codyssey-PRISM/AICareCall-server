@@ -21,6 +21,10 @@ class Settings(BaseSettings):
     # 서버 설정
     DEBUG: bool = False
     
+    # Database
+    DATABASE_URL: str = "sqlite+aiosqlite:///./data/app.db"
+    # PostgreSQL로 전환 시: postgresql+asyncpg://user:password@localhost/dbname
+    
     @property
     def voip_topic(self) -> str:
         """VoIP 토픽 = Bundle ID + .voip"""

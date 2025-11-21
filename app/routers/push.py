@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from app.models.push import PushRequest, VoipPushRequest, PushResponse
+from app.schemas.push import PushRequest, VoipPushRequest, PushResponse
 from app.services.apns import APNsService
 from app.core.config import get_settings
 
