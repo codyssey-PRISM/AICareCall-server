@@ -298,6 +298,7 @@ alembic current
 - **schemas vs models**:
   - `app/schemas/`: API 요청/응답용 Pydantic 모델
   - `app/db/models/`: DB 테이블용 SQLAlchemy 모델
+- SQlite Viewer for VScode 설치: https://marketplace.cursorapi.com/items/?itemName=qwtel.sqlite-viewer
 
 ## 🔐 보안
 
