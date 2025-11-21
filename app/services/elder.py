@@ -32,7 +32,7 @@ class ElderService:
             name=elder_data.name,
             relationship=elder_data.relationship,
             phone=elder_data.phone,
-            residence_type=elder_data.residence,
+            residence_type=elder_data.residence_type,
             health_condition=elder_data.health_condition,
             begin_date=elder_data.begin_date,
             end_date=elder_data.end_date,

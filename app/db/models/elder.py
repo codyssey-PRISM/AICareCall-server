@@ -1,6 +1,6 @@
 """Elder 모델"""
 from datetime import datetime
-from sqlalchemy import String, DateTime, Boolean, Integer, ForeignKey
+from sqlalchemy import String, DateTime, Boolean, Integer, ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column
 from app.db.base import Base
 
@@ -23,6 +23,13 @@ class Elder(Base):
     ask_emotion: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     ask_special_event: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     additional_info: Mapped[str] = mapped_column(String(511), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, 
+        server_default=func.now(), 
+        onupdate=func.now(), 
+        nullable=False
+    )
     
     def __repr__(self) -> str:
         return f"<Elder(id={self.id}, user_id={self.user_id}, name='{self.name}')>"
