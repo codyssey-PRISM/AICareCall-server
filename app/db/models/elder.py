@@ -14,7 +14,7 @@ class Elder(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     relationship: Mapped[str] = mapped_column(String(255), nullable=False)
     phone: Mapped[str] = mapped_column(String(15), nullable=False)
-    residence: Mapped[str] = mapped_column(String(255), nullable=False)
+    residence_type: Mapped[str] = mapped_column(String(255), nullable=False)
     health_condition: Mapped[str] = mapped_column(String(511), nullable=False)
     begin_date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     end_date: Mapped[datetime] = mapped_column(DateTime, nullable=True)
