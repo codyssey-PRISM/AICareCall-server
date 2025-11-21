@@ -14,3 +14,9 @@ venv/
 ENV/
 env/
 .DS_Store
+
+# Database
+data/
+*.db
+*.sqlite
+*.sqlite3
