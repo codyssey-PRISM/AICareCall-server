@@ -1,0 +1,88 @@
+"""Elder 관련 API 라우터"""
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.db.session import get_db
+from app.schemas.elder import ElderCreate, ElderResponse
+from app.services.elder import ElderService
+
+router = APIRouter(prefix="/users", tags=["elders"])
+
+
+@router.post("/{user_id}/elders", response_model=ElderResponse, status_code=status.HTTP_201_CREATED)
+async def create_elder(
+    user_id: int,
+    elder_data: ElderCreate,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    새로운 어르신 등록
+    
+    - **user_id**: 사용자 ID
+    - **elder_data**: 어르신 정보 및 통화 스케줄
+    
+    Returns:
+        생성된 어르신 정보
+    """
+    try:
+        elder = await ElderService.create_elder(
+            db=db,
+            user_id=user_id,
+            elder_data=elder_data
+        )
+        return elder
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"어르신 등록 중 오류가 발생했습니다: {str(e)}"
+        )
+
+
+@router.get("/{user_id}/elders", response_model=list[ElderResponse])
+async def get_user_elders(
+    user_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    특정 사용자의 모든 어르신 목록 조회
+    
+    - **user_id**: 사용자 ID
+    
+    Returns:
+        어르신 목록
+    """
+    elders = await ElderService.get_elders_by_user(db=db, user_id=user_id)
+    return elders
+
+
+@router.get("/{user_id}/elders/{elder_id}", response_model=ElderResponse)
+async def get_elder(
+    user_id: int,
+    elder_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    특정 어르신 정보 조회
+    
+    - **user_id**: 사용자 ID
+    - **elder_id**: 어르신 ID
+    
+    Returns:
+        어르신 정보
+    """
+    elder = await ElderService.get_elder_by_id(db=db, elder_id=elder_id)
+    
+    if not elder:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="해당 어르신을 찾을 수 없습니다"
+        )
+    
+    # 해당 어르신이 요청한 user_id의 소유인지 확인
+    if elder.user_id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="접근 권한이 없습니다"
+        )
+    
+    return elder
