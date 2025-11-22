@@ -158,4 +158,47 @@ class ElderService:
         await db.refresh(elder)
         
         return elder
+    
+    @staticmethod
+    async def verify_and_register_device(
+        db: AsyncSession,
+        invite_code: str,
+        voip_device_token: str
+    ) -> Elder:
+        """
+        초대 코드를 검증하고 VoIP 디바이스 토큰을 등록
+        
+        Args:
+            db: 데이터베이스 세션
+            invite_code: 초대 코드
+            voip_device_token: VoIP 디바이스 토큰
+            
+        Returns:
+            업데이트된 Elder 객체
+            
+        Raises:
+            ValueError: 초대 코드가 유효하지 않거나 이미 사용된 경우
+        """
+        # 1. invite_code로 Elder 조회
+        result = await db.execute(
+            select(Elder).where(Elder.invite_code == invite_code)
+        )
+        elder = result.scalar_one_or_none()
+        
+        # 2. 존재하지 않으면 에러
+        if not elder:
+            raise ValueError("초대 코드가 유효하지 않습니다")
+        
+        # 3. voip_device_token이 이미 있으면 에러 (이미 등록됨)
+        if elder.voip_device_token is not None:
+            raise ValueError("이미 등록된 초대 코드입니다")
+        
+        # 4. voip_device_token 업데이트
+        elder.voip_device_token = voip_device_token
+        
+        # 5. commit 및 refresh
+        await db.commit()
+        await db.refresh(elder)
+        
+        return elder
 

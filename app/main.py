@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routers import push, webhook, health, elders, auth
+from app.routers import push, webhook, health, elders, auth, elder_app
 from app.core.config import get_settings
 from app.db.base import Base
 from app.db.session import engine
@@ -19,6 +19,7 @@ app.include_router(auth.router)
 app.include_router(push.router)
 app.include_router(webhook.router)
 app.include_router(elders.router)
+app.include_router(elder_app.router)
 
 
 # 서버 시작 시 로그
