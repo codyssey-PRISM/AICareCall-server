@@ -1,8 +1,12 @@
 """Elder 모델"""
 from datetime import datetime
+from typing import TYPE_CHECKING
 from sqlalchemy import String, DateTime, Boolean, Integer, ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column
 from app.db.base import Base
+
+if TYPE_CHECKING:
+    from app.db.models.call import Call
 
 
 class Elder(Base):
@@ -31,6 +35,8 @@ class Elder(Base):
         onupdate=func.now(), 
         nullable=False
     )
+
+    calls: Mapped[list["Call"]] = relationship("Call", back_populates="elder", cascade="all, delete-orphan")
     
     def __repr__(self) -> str:
         return f"<Elder(id={self.id}, user_id={self.user_id}, name='{self.name}')>"
