@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.db.models.elder import Elder
 from app.db.models.call_schedule import CallSchedule
+from app.db.models.user import User
 from app.schemas.elder import ElderCreate
 
 
@@ -25,7 +26,19 @@ class ElderService:
             
         Returns:
             생성된 Elder 객체
+            
+        Raises:
+            ValueError: 보호자(User)가 존재하지 않을 경우
         """
+        # 0. 보호자 존재 여부 확인
+        user_result = await db.execute(
+            select(User).where(User.id == user_id)
+        )
+        user = user_result.scalar_one_or_none()
+        
+        if user is None:
+            raise ValueError(f"존재하지 않는 보호자입니다. (user_id: {user_id})")
+        
         # 1. Elder 레코드 생성
         new_elder = Elder(
             user_id=user_id,
