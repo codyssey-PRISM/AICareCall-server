@@ -18,7 +18,7 @@ sys.path.append(str(Path(__file__).resolve().parent.parent))
 from app.core.config import get_settings
 from app.db.base import Base
 # 모든 모델을 import해야 alembic이 인식함
-from app.db.models import User  # noqa: F401
+from app.db.models import *  # noqa: F401
 
 # this is the Alembic Config object
 config = context.config

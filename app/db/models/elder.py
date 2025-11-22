@@ -23,6 +23,7 @@ class Elder(Base):
     ask_emotion: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     ask_special_event: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     additional_info: Mapped[str] = mapped_column(String(511), nullable=True)
+    invite_code: Mapped[str] = mapped_column(String(6), nullable=False, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, 
