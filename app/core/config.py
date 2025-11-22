@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     GMAIL_APP_PASSWORD: str
     SMTP_SERVER: str = "smtp.gmail.com"
     SMTP_PORT: int = 587
+
+    # Vapi
+    VAPI_API_KEY: str
     
     @property
     def voip_topic(self) -> str:
