@@ -34,8 +34,21 @@ class ElderResponse(BaseModel):
     ask_special_event: bool
     additional_info: str | None
     invite_code: str
+    voip_device_token: str | None
     created_at: datetime
     updated_at: datetime
     
     class Config:
         from_attributes = True
+
+
+class VerifyInviteCodeRequest(BaseModel):
+    invite_code: str
+    voip_device_token: str
+
+
+class VerifyInviteCodeResponse(BaseModel):
+    success: bool
+    elder_id: int
+    elder_name: str
+    message: str
