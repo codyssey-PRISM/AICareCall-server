@@ -31,6 +31,12 @@ async def create_elder(
             elder_data=elder_data
         )
         return elder
+    except ValueError as e:
+        # 보호자가 존재하지 않는 경우
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e)
+        )
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
