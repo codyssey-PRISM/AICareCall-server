@@ -2,7 +2,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
 from sqlalchemy import String, DateTime, Boolean, Integer, ForeignKey, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 
 if TYPE_CHECKING:
@@ -16,7 +16,7 @@ class Elder(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    relationship: Mapped[str] = mapped_column(String(255), nullable=False)
+    relation: Mapped[str] = mapped_column(String(255), nullable=False)
     phone: Mapped[str] = mapped_column(String(15), nullable=False)
     residence_type: Mapped[str] = mapped_column(String(255), nullable=False)
     health_condition: Mapped[str] = mapped_column(String(511), nullable=False)
