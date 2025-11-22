@@ -1,4 +1,6 @@
 """Elder 서비스 레이어"""
+import random
+import string
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.db.models.elder import Elder
@@ -9,6 +11,17 @@ from app.schemas.elder import ElderCreate
 
 class ElderService:
     """어르신 관련 비즈니스 로직"""
+    
+    @staticmethod
+    def _generate_invite_code() -> str:
+        """
+        6자리 초대 코드 생성 (대문자 알파벳 + 숫자)
+        
+        Returns:
+            6자리 초대 코드 (예: "A1B2C3", "XY9Z01")
+        """
+        chars = string.ascii_uppercase + string.digits
+        return ''.join(random.choices(chars, k=6))
     
     @staticmethod
     async def create_elder(
@@ -54,6 +67,7 @@ class ElderService:
             ask_emotion=elder_data.ask_emotion,
             ask_special_event=elder_data.ask_special_event,
             additional_info=elder_data.additional_info,
+            invite_code=ElderService._generate_invite_code(),
         )
         
         db.add(new_elder)
@@ -108,4 +122,40 @@ class ElderService:
             select(Elder).where(Elder.user_id == user_id)
         )
         return list(result.scalars().all())
+    
+    @staticmethod
+    async def regenerate_invite_code(
+        db: AsyncSession,
+        elder_id: int,
+        user_id: int
+    ) -> Elder:
+        """
+        초대 코드 재생성
+        
+        Args:
+            db: 데이터베이스 세션
+            elder_id: 어르신 ID
+            user_id: 사용자 ID (권한 확인용)
+            
+        Returns:
+            업데이트된 Elder 객체
+            
+        Raises:
+            ValueError: 어르신을 찾을 수 없거나 권한이 없는 경우
+        """
+        elder = await ElderService.get_elder_by_id(db, elder_id)
+        
+        if not elder:
+            raise ValueError("어르신을 찾을 수 없습니다")
+        
+        if elder.user_id != user_id:
+            raise ValueError("권한이 없습니다")
+        
+        # 새로운 초대 코드 생성 및 할당
+        elder.invite_code = ElderService._generate_invite_code()
+        
+        await db.commit()
+        await db.refresh(elder)
+        
+        return elder
 

@@ -92,3 +92,39 @@ async def get_elder(
         )
     
     return elder
+
+
+@router.post("/{user_id}/elders/{elder_id}/regenerate-invite-code", response_model=ElderResponse)
+async def regenerate_invite_code(
+    user_id: int,
+    elder_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    초대 코드 재생성
+    
+    - **user_id**: 사용자 ID
+    - **elder_id**: 어르신 ID
+    
+    Returns:
+        업데이트된 어르신 정보 (새로운 초대 코드 포함)
+    """
+    try:
+        elder = await ElderService.regenerate_invite_code(
+            db=db,
+            elder_id=elder_id,
+            user_id=user_id
+        )
+        return elder
+    except ValueError as e:
+        error_msg = str(e)
+        if "찾을 수 없습니다" in error_msg:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=error_msg
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=error_msg
+            )

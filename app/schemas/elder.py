@@ -33,6 +33,7 @@ class ElderResponse(BaseModel):
     ask_emotion: bool
     ask_special_event: bool
     additional_info: str | None
+    invite_code: str
     created_at: datetime
     updated_at: datetime
     
