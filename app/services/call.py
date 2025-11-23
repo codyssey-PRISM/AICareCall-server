@@ -2,9 +2,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.elder import ElderService
 from app.services.apns import APNSService
 from app.db.models.elder import Elder
+from app.core.config import get_settings
 
 
 class CallService:
+
+    SETTINGS = get_settings()
 
     REQUIRED_QUESTIONS_TEMPLATE = {
         "meal": "Meals – Ask whether they have eaten today.\nExample: 오늘 식사는 하셨어요?",
@@ -58,19 +61,34 @@ class CallService:
         structured_data_plan = CallService._build_structured_data_plan()
 
         assistant = {
+            "voice": {
+                "provider": "openai",
+                "voiceId": "echo",
+                "model": "tts-1"
+            },
             "model": {
-                "provider": "anthropic",
+                "provider": "openai",
+                "model": "gpt-4o",
                 "messages": [
                     {"role": "system", "content": system_prompt}
                 ]
             },
+            "transcriber": {
+                "model": "nova-2",
+                "language": "ko",
+                "provider": "deepgram"
+            },
+            "firstMessageMode": "assistant-speaks-first-with-model-generated-message",
+            "endCallFunctionEnabled": True,
+            "endCallMessage": "그럼 통화는 이렇게 마무리하고, 다음에 또 전화드리겠습니다.",
             "serverMessages": ["end-of-call-report"],
             "maxDurationSeconds": CallService.MAX_CALL_DURATION_SECONDS,
             "analysisPlan": {
                 "minMessagesThreshold": 1,
                 "summaryPlan": summary_plan,
                 "structuredDataPlan": structured_data_plan
-            }
+            },
+            "server": CallService.SETTINGS.SERVER_URL
         }
         
         return assistant
@@ -127,9 +145,13 @@ class CallService:
             "If you detect signs of distress or risk, respond calmly "
             "and gently ask more about the situation without "
             "being overly intrusive.\n\n"
-            "LANGUAGE REQUIREMENT: polite, respectful KOREAN\n\n"
             f"CLIENT INFORMATION\n\n{client_information}\n"
             f"REQUIRED CHECK-IN QUESTIONS\n\n{questions_prompt}\n"
+            "LANGUAGE REQUIREMENT\n\n"
+            "- polite, respectful korean\n"
+            "- do not say more than 2 sentences at a time\n"
+            "- do not ask more than 1 question at a time\n"
+            "- begin the conversation with a greeting and do not introduce yourself\n\n"
         )
         
         return system_prompt
