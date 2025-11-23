@@ -1,8 +1,8 @@
-"""initial schema with all tables
+"""initial schema
 
-Revision ID: 0cd053353e47
+Revision ID: a2115e1b5afc
 Revises: 
-Create Date: 2025-11-23 00:48:32.979443
+Create Date: 2025-11-23 19:42:51.999479
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '0cd053353e47'
+revision: str = 'a2115e1b5afc'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -33,7 +33,7 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=255), nullable=False),
-    sa.Column('relationship', sa.String(length=255), nullable=False),
+    sa.Column('relation', sa.String(length=255), nullable=False),
     sa.Column('phone', sa.String(length=15), nullable=False),
     sa.Column('residence_type', sa.String(length=255), nullable=False),
     sa.Column('health_condition', sa.String(length=511), nullable=False),
@@ -45,12 +45,14 @@ def upgrade() -> None:
     sa.Column('ask_special_event', sa.Boolean(), nullable=False),
     sa.Column('additional_info', sa.String(length=511), nullable=True),
     sa.Column('invite_code', sa.String(length=6), nullable=False),
+    sa.Column('voip_device_token', sa.String(length=255), nullable=True),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_elders_invite_code'), 'elders', ['invite_code'], unique=False)
+    op.create_index(op.f('ix_elders_voip_device_token'), 'elders', ['voip_device_token'], unique=False)
     op.create_table('call_schedules',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('elder_id', sa.Integer(), nullable=False),
@@ -94,6 +96,7 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_calls_vapi_call_id'), table_name='calls')
     op.drop_table('calls')
     op.drop_table('call_schedules')
+    op.drop_index(op.f('ix_elders_voip_device_token'), table_name='elders')
     op.drop_index(op.f('ix_elders_invite_code'), table_name='elders')
     op.drop_table('elders')
     op.drop_index(op.f('ix_users_email'), table_name='users')
