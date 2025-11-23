@@ -1,8 +1,13 @@
 """Elder 모델"""
 from datetime import time
 from sqlalchemy import String, Integer, ForeignKey, Time
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
+from typing import TYPE_CHECKING
+
+
+if TYPE_CHECKING:
+    from app.db.models.elder import Elder
 
 
 class CallSchedule(Base):
@@ -13,6 +18,8 @@ class CallSchedule(Base):
     elder_id: Mapped[int] = mapped_column(Integer, ForeignKey("elders.id"), nullable=False)
     day_of_week: Mapped[str] = mapped_column(String(10), nullable=False)
     time: Mapped[time] = mapped_column(Time, nullable=False)
+
+    elder: Mapped["Elder"] = relationship("Elder", back_populates="call_schedules")
     
     def __repr__(self) -> str:
         return f"<CallSchedule(id={self.id}, elder_id={self.elder_id}, day_of_week={self.day_of_week}, time={self.time})>"
