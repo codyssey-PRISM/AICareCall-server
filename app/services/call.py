@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.elder import ElderService
-from app.services.apns import APNSService
+from app.services.apns import APNsService
 from app.db.models.elder import Elder
 from app.core.config import get_settings
 

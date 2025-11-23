@@ -1,11 +1,12 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
-from sqlalchemy import String, DateTime, Integer, ForeignKey, Float, Text, func, JSON
+from sqlalchemy import String, DateTime, Integer, ForeignKey, Text, func, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 
 if TYPE_CHECKING:
     from app.db.models.call_message import CallMessage
+    from app.db.models.elder import Elder
 
 
 class Call(Base):
@@ -34,3 +35,4 @@ class Call(Base):
     
     # Relationships
     messages: Mapped[list["CallMessage"]] = relationship("CallMessage", back_populates="call", cascade="all, delete-orphan")
+    elder: Mapped["Elder"] = relationship("Elder", back_populates="calls")
