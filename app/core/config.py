@@ -33,6 +33,7 @@ class Settings(BaseSettings):
 
     # Vapi
     VAPI_API_KEY: str
+    VAPI_WEBHOOK_URL: str
     
     @property
     def voip_topic(self) -> str:
