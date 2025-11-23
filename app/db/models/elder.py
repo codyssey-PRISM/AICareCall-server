@@ -17,6 +17,8 @@ class Elder(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
+    gender: Mapped[str] = mapped_column(String(10), nullable=False)
+    age: Mapped[int] = mapped_column(Integer, nullable=False)
     relation: Mapped[str] = mapped_column(String(255), nullable=False)
     phone: Mapped[str] = mapped_column(String(15), nullable=False)
     residence_type: Mapped[str] = mapped_column(String(255), nullable=False)
