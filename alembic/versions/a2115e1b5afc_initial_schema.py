@@ -1,8 +1,14 @@
 """initial schema
 
+<<<<<<<< HEAD:alembic/versions/a2115e1b5afc_initial_schema.py
 Revision ID: a2115e1b5afc
 Revises: 
 Create Date: 2025-11-23 19:42:51.999479
+========
+Revision ID: 2731dbe03d4d
+Revises: 
+Create Date: 2025-11-24 02:05:32.919461
+>>>>>>>> 5503986 (alembic migration 초기화):alembic/versions/2731dbe03d4d_initial_schema.py
 
 """
 from typing import Sequence, Union
@@ -12,7 +18,11 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
+<<<<<<<< HEAD:alembic/versions/a2115e1b5afc_initial_schema.py
 revision: str = 'a2115e1b5afc'
+========
+revision: str = '2731dbe03d4d'
+>>>>>>>> 5503986 (alembic migration 초기화):alembic/versions/2731dbe03d4d_initial_schema.py
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -33,6 +43,11 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=255), nullable=False),
+<<<<<<<< HEAD:alembic/versions/a2115e1b5afc_initial_schema.py
+========
+    sa.Column('gender', sa.String(length=10), nullable=False),
+    sa.Column('age', sa.Integer(), nullable=False),
+>>>>>>>> 5503986 (alembic migration 초기화):alembic/versions/2731dbe03d4d_initial_schema.py
     sa.Column('relation', sa.String(length=255), nullable=False),
     sa.Column('phone', sa.String(length=15), nullable=False),
     sa.Column('residence_type', sa.String(length=255), nullable=False),
