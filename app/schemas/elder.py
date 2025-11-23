@@ -3,7 +3,9 @@ from datetime import datetime, time
 
 class ElderCreate(BaseModel):
     name: str
-    relationship: str
+    gender: str
+    age: int
+    relation: str
     phone: str
     residence_type: str
     health_condition: str

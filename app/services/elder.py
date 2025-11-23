@@ -4,7 +4,6 @@ import string
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.db.models.elder import Elder
-from app.db.models.call_schedule import CallSchedule
 from app.db.models.user import User
 from app.schemas.elder import ElderCreate
 
@@ -56,7 +55,9 @@ class ElderService:
         new_elder = Elder(
             user_id=user_id,
             name=elder_data.name,
-            relationship=elder_data.relationship,
+            gender=elder_data.gender,
+            age=elder_data.age,
+            relation=elder_data.relation,
             phone=elder_data.phone,
             residence_type=elder_data.residence_type,
             health_condition=elder_data.health_condition,
@@ -73,16 +74,14 @@ class ElderService:
         db.add(new_elder)
         await db.flush()  # elder.id 생성을 위해 flush
         
-        # 2. CallSchedule 레코드들 생성
-        # 각 요일별 × 각 시간별 조합으로 생성
-        for weekday in elder_data.call_weekdays:
-            for call_time in elder_data.call_times:
-                schedule = CallSchedule(
-                    elder_id=new_elder.id,
-                    day_of_week=weekday,
-                    time=call_time
-                )
-                db.add(schedule)
+        # 2. CallSchedule 레코드들 생성 (CallScheduleService 사용)
+        from app.services.call_schedule import CallScheduleService
+        await CallScheduleService.create_schedules(
+            db=db,
+            elder_id=new_elder.id,
+            weekdays=elder_data.call_weekdays,
+            times=elder_data.call_times
+        )
         
         await db.commit()
         await db.refresh(new_elder)
