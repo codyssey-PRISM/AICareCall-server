@@ -6,10 +6,10 @@ from app.core.security import create_apns_jwt
 class APNsService:
     """APNs 푸시 전송 서비스"""
     
-    def __init__(self):
-        self.settings = get_settings()
+    SETTINGS = get_settings()
     
-    async def send_alert_push(self, device_token: str, title: str, body: str) -> dict:
+    @staticmethod
+    async def send_alert_push(device_token: str, title: str, body: str) -> dict:
         """
         일반 알림 푸시 전송
         
@@ -22,7 +22,7 @@ class APNsService:
             dict: APNs 응답 (status_code, apns_id, body)
         """
         jwt_token = create_apns_jwt()
-        url = f"{self.settings.apns_host}/3/device/{device_token}"
+        url = f"{APNsService.SETTINGS.apns_host}/3/device/{device_token}"
         
         payload = {
             "aps": {
@@ -36,7 +36,7 @@ class APNsService:
         
         headers = {
             "authorization": f"bearer {jwt_token}",
-            "apns-topic": self.settings.BUNDLE_ID,
+            "apns-topic": APNsService.SETTINGS.BUNDLE_ID,
             "apns-push-type": "alert",
             "apns-priority": "10",
         }
@@ -49,34 +49,32 @@ class APNsService:
                 "body": resp.text,
             }
     
-    async def send_voip_push(self, device_token: str, ai_call_id: str | None = None) -> dict:
+    @staticmethod
+    async def send_voip_push(device_token: str, data: dict | None = None) -> dict:
         """
         VoIP 푸시 전송
         
         Args:
             device_token: VoIP 디바이스 토큰
-            ai_call_id: AI 통화 ID (선택)
+            data: 앱 내 assistant configuration 설정을 위한 데이터
             
         Returns:
             dict: APNs 응답 (status_code, apns_id, body)
         """
         jwt_token = create_apns_jwt()
-        url = f"{self.settings.apns_host}/3/device/{device_token}"
+        url = f"{APNsService.SETTINGS.apns_host}/3/device/{device_token}"
         
         # VoIP 푸시는 보통 알림 UI를 쓰지 않고, content-available로 앱만 깨우는 패턴
         payload = {
             "aps": {
                 "content-available": 1
             },
-            "data": {
-                "type": "ai_call",
-                "ai_call_id": ai_call_id or "test"
-            }
+            "data": data or {}
         }
         
         headers = {
             "authorization": f"bearer {jwt_token}",
-            "apns-topic": self.settings.voip_topic,
+            "apns-topic": APNsService.SETTINGS.voip_topic,
             "apns-push-type": "voip",
             "apns-priority": "10",
         }

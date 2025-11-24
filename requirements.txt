@@ -5,6 +5,8 @@ httpx[http2]
 pydantic-settings
 python-dotenv
 aiosmtplib
+apscheduler>=3.10.0
+vapi-server-sdk
 
 # Database
 sqlalchemy[asyncio]>=2.0.0

@@ -1,9 +1,15 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
 
 
 class Settings(BaseSettings):
     """애플리케이션 설정"""
+    
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        case_sensitive=True,
+        extra="ignore"  # .env에 정의되지 않은 필드 무시
+    )
     
     # Apple APNs
     TEAM_ID: str
@@ -33,6 +39,7 @@ class Settings(BaseSettings):
 
     # Vapi
     VAPI_API_KEY: str
+    SERVER_URL: str
     
     @property
     def voip_topic(self) -> str:
@@ -45,10 +52,6 @@ class Settings(BaseSettings):
         if self.APNS_ENV == "production":
             return "https://api.push.apple.com"
         return "https://api.sandbox.push.apple.com"
-    
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
 
 
 @lru_cache()

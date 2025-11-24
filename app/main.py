@@ -3,6 +3,7 @@ from app.routers import push, webhook, health, elders, auth, elder_app
 from app.core.config import get_settings
 from app.db.base import Base
 from app.db.session import engine
+from app.scheduler.scheduler import start_scheduler, shutdown_scheduler
 
 settings = get_settings()
 
@@ -37,9 +38,17 @@ async def startup_event():
     print(f"🎯 VoIP Topic: {settings.voip_topic}")
     print(f"🗄️  Database: {settings.DATABASE_URL}")
     print("=" * 50)
+    
+    # 스케줄러 시작
+    start_scheduler()
+    print("⏰ Scheduler started")
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
     print("\n👋 Server shutting down...")
+    
+    # 스케줄러 종료
+    shutdown_scheduler()
+    print("⏰ Scheduler stopped")
 
