@@ -1,7 +1,10 @@
+from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.elder import ElderService
 from app.services.apns import APNsService
 from app.db.models.elder import Elder
+from app.db.models.call import Call
+from app.db.models.call_message import CallMessage
 from app.core.config import get_settings
 
 
@@ -230,3 +233,127 @@ class CallService:
             },
             "timeoutSeconds": CallService.ANALYSIS_TIMEOUT_SECONDS
         }
+    
+    @staticmethod
+    async def save_call_from_webhook(db: AsyncSession, webhook_data: dict) -> Call:
+        """
+        end-of-call-report 웹훅 데이터를 파싱하여 DB에 저장
+        
+        Args:
+            db: 데이터베이스 세션
+            webhook_data: Vapi 웹훅 전체 데이터
+            
+        Returns:
+            생성된 Call 객체
+            
+        Raises:
+            ValueError: elder_id가 없거나, Elder가 존재하지 않을 경우
+        """
+        message = webhook_data.get("message", {})
+        
+        # 1. elder_id 추출 및 검증
+        call_data = message.get("call", {})
+        
+        # assistantOverrides.metadata에서 먼저 찾고, 없으면 metadata에서 찾기
+        # iOS에서 assistantOverrides로 전달하면 call.assistantOverrides.metadata에 저장됨
+        assistant_overrides = call_data.get("assistantOverrides", {})
+        metadata = assistant_overrides.get("metadata", {})
+        
+        # assistantOverrides에 없으면 call.metadata에서 찾기 (fallback)
+        if not metadata:
+            metadata = call_data.get("metadata", {})
+            print("📍 metadata 위치: call.metadata")
+        else:
+            print("📍 metadata 위치: call.assistantOverrides.metadata")
+        
+        elder_id_str = metadata.get("elder_id")
+        print(f"🔍 추출된 elder_id: {elder_id_str}")
+        
+        if not elder_id_str:
+            raise ValueError("metadata에 elder_id가 없습니다. (assistantOverrides.metadata 또는 metadata 확인)")
+        
+        try:
+            elder_id = int(elder_id_str)
+        except (ValueError, TypeError):
+            raise ValueError(f"elder_id가 유효하지 않습니다: {elder_id_str}")
+        
+        # 2. Elder 존재 여부 확인
+        elder = await ElderService.get_elder_by_id(db, elder_id)
+        if not elder:
+            raise ValueError(f"존재하지 않는 어르신입니다. (elder_id: {elder_id})")
+        
+        # 3. 통화 기본 정보 추출
+        vapi_call_id = call_data.get("id")
+        started_at_str = message.get("startedAt")
+        ended_at_str = message.get("endedAt")
+        ended_reason = message.get("endedReason", "unknown")
+        
+        # ISO 8601 문자열을 datetime으로 변환
+        started_at = datetime.fromisoformat(started_at_str.replace("Z", "+00:00")) if started_at_str else datetime.now()
+        ended_at = datetime.fromisoformat(ended_at_str.replace("Z", "+00:00")) if ended_at_str else None
+        
+        # endedReason을 status로 매핑
+        if ended_reason in ["customer-ended-call", "assistant-ended-call"]:
+            status = "completed"
+        else:
+            status = "failed"
+        
+        # 4. Vapi 분석 결과 추출
+        summary = message.get("summary", "")
+        
+        # structuredData에서 emotion과 tags 추출
+        artifact = message.get("artifact", {})
+        structured_data = artifact.get("structuredData") or {}
+        emotion = structured_data.get("emotion")
+        tags = structured_data.get("tags")
+        
+        # 5. Call 레코드 생성
+        new_call = Call(
+            vapi_call_id=vapi_call_id,
+            elder_id=elder_id,
+            started_at=started_at,
+            ended_at=ended_at,
+            status=status,
+            summary=summary,
+            emotion=emotion,
+            tags=tags
+        )
+        
+        db.add(new_call)
+        await db.flush()  # call.id 생성을 위해 flush
+        
+        # 6. CallMessage 레코드들 생성
+        messages = message.get("messages", [])
+        
+        for msg in messages:
+            msg_role = msg.get("role")
+            
+            # system 메시지는 제외
+            if msg_role not in ["user", "bot"]:
+                continue
+            
+            # role 매핑: bot → assistant
+            role = "user" if msg_role == "user" else "assistant"
+            message_text = msg.get("message", "")
+            
+            # timestamp: 밀리초 단위 Unix timestamp를 datetime으로 변환
+            time_ms = msg.get("time")
+            if time_ms:
+                timestamp = datetime.fromtimestamp(time_ms / 1000.0)
+            else:
+                timestamp = started_at
+            
+            call_message = CallMessage(
+                call_id=new_call.id,
+                role=role,
+                message=message_text,
+                timestamp=timestamp
+            )
+            
+            db.add(call_message)
+        
+        # 7. 커밋
+        await db.commit()
+        await db.refresh(new_call)
+        
+        return new_call
