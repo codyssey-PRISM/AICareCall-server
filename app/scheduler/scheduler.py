@@ -21,6 +21,7 @@ async def schedule_calls():
     다음 1시간 동안 예정된 통화 스케줄을 조회하고 APScheduler에 등록
     """
     logger.info(f"Scheduling calls for next hour at {datetime.now()}")
+    print(f"Scheduling calls for next hour at {datetime.now()}")
     
     try:
         # 데이터베이스 세션 생성
@@ -29,6 +30,7 @@ async def schedule_calls():
             schedules = await CallScheduleService.get_scheduled_calls_for_next_hour(db)
             
             logger.info(f"Found {len(schedules)} scheduled calls for next hour")
+            print(f"Found {len(schedules)} scheduled calls for next hour")
             
             # 각 스케줄에 대해 통화 작업 예약
             for elder_id, run_time in schedules:
@@ -39,6 +41,7 @@ async def schedule_calls():
                 scheduler.add_job(
                     initiate_call,
                     trigger='date',
+                    misfire_grace_time=600,
                     run_date=run_time,
                     args=[elder_id],
                     id=job_id,
@@ -46,6 +49,7 @@ async def schedule_calls():
                 )
                 
                 logger.info(f"Scheduled call for elder {elder_id} at {run_time}")
+                print(f"Scheduled call for elder {elder_id} at {run_time}")
             
             break  # get_db()는 generator이므로 한 번만 실행
         
@@ -75,7 +79,8 @@ def start_scheduler():
 
         scheduler.add_job(
             schedule_calls,
-            trigger=CronTrigger(minute=55), # every hour
+            trigger=CronTrigger(minute=50), # every hour
+            misfire_grace_time=599,
             id="schedule_calls",
             name="Schedule calls within the next hour",
             replace_existing=True
@@ -84,11 +89,13 @@ def start_scheduler():
         # 스케줄러 시작
         scheduler.start()
         logger.info("Scheduler started successfully")
+        print("Scheduler started successfully")
         
         # 등록된 작업 목록 출력
         jobs = scheduler.get_jobs()
         for job in jobs:
             logger.info(f"Scheduled job: {job.id} - Next run: {job.next_run_time}")
+            print(f"Scheduled job: {job.id} - Next run: {job.next_run_time}")
             
     except Exception as e:
         logger.error(f"Failed to start scheduler: {str(e)}", exc_info=True)
