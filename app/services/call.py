@@ -88,7 +88,9 @@ class CallService:
                 "summaryPlan": summary_plan,
                 "structuredDataPlan": structured_data_plan
             },
-            "server": CallService.SETTINGS.SERVER_URL
+            "server": {
+                "url": CallService.SETTINGS.SERVER_URL,
+            }
         }
         
         return assistant
@@ -138,10 +140,10 @@ class CallService:
         system_prompt = (
             "You are a compassionate assistant named Sori "
             "designed to check in on Korean older adults living alone. "
-            "Speak with warmth, patience, and clarity, similar to "
-            "a trained social worker. Ask gentle, supportive questions "
-            "about their well-being, daily needs, and safety, "
-            "and also be an attentive listener. "
+            "Speak with warmth, patience, and clarity."
+            "Ask gentle, supportive questions, including the required check-in questions,"
+            "about their well-being, daily needs, and safety. "
+            "Be a good 말동무 who is curious about their life, and also be an attentive listener. "
             "If you detect signs of distress or risk, respond calmly "
             "and gently ask more about the situation without "
             "being overly intrusive.\n\n"
@@ -149,7 +151,7 @@ class CallService:
             f"REQUIRED CHECK-IN QUESTIONS\n\n{questions_prompt}\n"
             "LANGUAGE REQUIREMENT\n\n"
             "- polite, respectful korean\n"
-            "- do not say more than 2 sentences at a time\n"
+            "- DO NOT SAY MORE THAN 2 SENTENCES AT A TIME\n"
             "- do not ask more than 1 question at a time\n"
             "- begin the conversation with a greeting and do not introduce yourself\n\n"
         )
