@@ -37,7 +37,7 @@ class CallService:
             "call_type": "scheduled"
         }
         
-        apns_response = await APNSService.send_voip_push(elder.voip_device_token, push_data)
+        apns_response = await APNsService.send_voip_push(elder.voip_device_token, push_data)
         return apns_response
     
     @staticmethod
