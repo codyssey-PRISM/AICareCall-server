@@ -7,6 +7,7 @@ from app.db.base import Base
 
 if TYPE_CHECKING:
     from app.db.models.call import Call
+    from app.db.models.call_schedule import CallSchedule
 
 
 class Elder(Base):
@@ -16,6 +17,8 @@ class Elder(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
+    gender: Mapped[str] = mapped_column(String(10), nullable=False)
+    age: Mapped[int] = mapped_column(Integer, nullable=False)
     relation: Mapped[str] = mapped_column(String(255), nullable=False)
     phone: Mapped[str] = mapped_column(String(15), nullable=False)
     residence_type: Mapped[str] = mapped_column(String(255), nullable=False)
@@ -37,6 +40,7 @@ class Elder(Base):
         nullable=False
     )
 
+    call_schedules: Mapped[list["CallSchedule"]] = relationship("CallSchedule", back_populates="elder", cascade="all, delete-orphan")
     calls: Mapped[list["Call"]] = relationship("Call", back_populates="elder", cascade="all, delete-orphan")
     
     def __repr__(self) -> str:

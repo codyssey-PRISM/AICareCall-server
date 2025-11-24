@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
 from app.schemas.elder import VerifyInviteCodeRequest, VerifyInviteCodeResponse
 from app.services.elder import ElderService
+from app.services.call import CallService
 
 router = APIRouter(prefix="/elder-app", tags=["elder-app"])
 
@@ -62,8 +63,50 @@ async def register_invitation_code(
                 detail=error_msg
             )
     except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"디바이스 등록 중 오류가 발생했습니다: {str(e)}"
+            )
+
+
+@router.get("/assistant-config/{elder_id}")
+async def get_assistant_config(
+    elder_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    특정 어르신의 Vapi Assistant 설정 조회
+    
+    VoIP push를 받은 iOS 앱이 이 API를 호출하여 
+    통화에 필요한 전체 assistant configuration을 가져갑니다.
+    
+    - **elder_id**: 어르신 ID
+    
+    Returns:
+        Vapi Assistant 설정 딕셔너리
+    
+    Raises:
+        404: 어르신을 찾을 수 없음
+    """
+    try:
+        elder = await ElderService.get_elder_by_id(db=db, elder_id=elder_id)
+        
+        if not elder:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="어르신을 찾을 수 없습니다."
+            )
+        
+        # CallService를 통해 assistant config 생성
+        assistant_config = await CallService.get_assistant_config(elder)
+        
+        return assistant_config
+        
+    except HTTPException:
+        raise
+    except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"디바이스 등록 중 오류가 발생했습니다: {str(e)}"
+            detail=f"Assistant 설정 조회 중 오류가 발생했습니다: {str(e)}"
         )
 
