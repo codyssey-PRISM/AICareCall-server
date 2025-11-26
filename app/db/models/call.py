@@ -18,6 +18,7 @@ class Call(Base):
     vapi_call_id: Mapped[str | None] = mapped_column(String(255), unique=True, index=True, nullable=True)
     
     elder_id: Mapped[int] = mapped_column(Integer, ForeignKey("elders.id"), nullable=False)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)  # ✨ 추가
     
     # 통화 시간 정보
     started_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
