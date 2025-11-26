@@ -9,6 +9,7 @@ class PushRequest(BaseModel):
 
 class VoipPushRequest(BaseModel):
     """VoIP 푸시 요청 모델"""
+    elder_id: int
     ai_call_id: str | None = None
 
 
