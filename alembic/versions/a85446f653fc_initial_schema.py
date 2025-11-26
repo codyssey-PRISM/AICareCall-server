@@ -1,14 +1,8 @@
 """initial schema
 
-<<<<<<<< HEAD:alembic/versions/a2115e1b5afc_initial_schema.py
-Revision ID: a2115e1b5afc
+Revision ID: a85446f653fc
 Revises: 
-Create Date: 2025-11-23 19:42:51.999479
-========
-Revision ID: 2731dbe03d4d
-Revises: 
-Create Date: 2025-11-24 02:05:32.919461
->>>>>>>> dev:alembic/versions/2731dbe03d4d_initial_schema.py
+Create Date: 2025-11-26 08:52:19.224538
 
 """
 from typing import Sequence, Union
@@ -18,11 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-<<<<<<<< HEAD:alembic/versions/a2115e1b5afc_initial_schema.py
-revision: str = 'a2115e1b5afc'
-========
-revision: str = '2731dbe03d4d'
->>>>>>>> dev:alembic/versions/2731dbe03d4d_initial_schema.py
+revision: str = 'a85446f653fc'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -43,11 +33,8 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=255), nullable=False),
-<<<<<<<< HEAD:alembic/versions/a2115e1b5afc_initial_schema.py
-========
     sa.Column('gender', sa.String(length=10), nullable=False),
     sa.Column('age', sa.Integer(), nullable=False),
->>>>>>>> dev:alembic/versions/2731dbe03d4d_initial_schema.py
     sa.Column('relation', sa.String(length=255), nullable=False),
     sa.Column('phone', sa.String(length=15), nullable=False),
     sa.Column('residence_type', sa.String(length=255), nullable=False),
@@ -80,6 +67,7 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('vapi_call_id', sa.String(length=255), nullable=True),
     sa.Column('elder_id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('started_at', sa.DateTime(), nullable=False),
     sa.Column('ended_at', sa.DateTime(), nullable=True),
     sa.Column('status', sa.String(length=50), nullable=False),
@@ -89,6 +77,7 @@ def upgrade() -> None:
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
     sa.ForeignKeyConstraint(['elder_id'], ['elders.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_calls_vapi_call_id'), 'calls', ['vapi_call_id'], unique=True)
