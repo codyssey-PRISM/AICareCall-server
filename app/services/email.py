@@ -1,7 +1,7 @@
-"""이메일 전송 서비스 (Gmail SMTP)"""
-import aiosmtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+"""이메일 전송 서비스 (SendGrid)"""
+import asyncio
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail, Email, To, Content
 from pathlib import Path
 from app.core.config import get_settings
 
@@ -10,7 +10,7 @@ settings = get_settings()
 
 async def send_auth_code_email(email: str, code: str) -> bool:
     """
-    인증 코드 이메일 전송 (Gmail SMTP 비동기)
+    인증 코드 이메일 전송 (SendGrid API)
     
     Args:
         email: 수신자 이메일
@@ -28,28 +28,22 @@ async def send_auth_code_email(email: str, code: str) -> bool:
         # 코드 치환
         html_content = html_content.replace("{{CODE}}", code)
         
-        # 이메일 메시지 생성
-        message = MIMEMultipart("alternative")
-        message["From"] = f"소리ai <{settings.EMAIL_FROM}>"
-        message["To"] = email
-        message["Subject"] = f"[소리ai] 인증 코드: {code}"
-        
-        # HTML 파트 추가
-        html_part = MIMEText(html_content, "html", "utf-8")
-        message.attach(html_part)
-        
-        # Gmail SMTP 서버로 비동기 전송
-        await aiosmtplib.send(
-            message,
-            hostname=settings.SMTP_SERVER,
-            port=settings.SMTP_PORT,
-            username=settings.EMAIL_FROM,
-            password=settings.GMAIL_APP_PASSWORD,
-            start_tls=True,
+        # SendGrid 메시지 생성
+        message = Mail(
+            from_email=Email(settings.EMAIL_FROM),
+            to_emails=To(email),
+            subject=f"[소리AI] 인증 코드: {code}",
+            html_content=Content("text/html", html_content)
         )
+        
+        # SendGrid API 클라이언트 생성 및 전송
+        # SendGrid는 동기 API이므로 asyncio.to_thread로 비동기 처리
+        sg = SendGridAPIClient(settings.SENDGRID_API_KEY)
+        response = await asyncio.to_thread(sg.send, message)
         
         print(f"📧 Email sent successfully to {email}")
         print(f"   Code: {code}")
+        print(f"   SendGrid Status: {response.status_code}")
         
         return True
         
