@@ -1,9 +1,10 @@
 from fastapi import FastAPI
-from app.routers import push, webhook, health, elders, auth, elder_app
+from app.routers import push, webhook, health, elders, auth, elder_app, dashboard
 from app.core.config import get_settings
 from app.db.base import Base
 from app.db.session import engine
 from app.scheduler.scheduler import start_scheduler, shutdown_scheduler
+from fastapi.middleware.cors import CORSMiddleware
 
 settings = get_settings()
 
@@ -14,6 +15,20 @@ app = FastAPI(
     debug=settings.DEBUG
 )
 
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    # 배포 후 프론트 주소도 여기 추가
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,      # or ["*"] (개발 중에는 편하게)
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # 라우터 등록
 app.include_router(health.router)
 app.include_router(auth.router)
@@ -21,6 +36,7 @@ app.include_router(push.router)
 app.include_router(webhook.router)
 app.include_router(elders.router)
 app.include_router(elder_app.router)
+app.include_router(dashboard.router)
 
 
 # 서버 시작 시 로그
