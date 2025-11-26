@@ -299,11 +299,12 @@ class CallService:
             status = "failed"
         
         # 4. Vapi 분석 결과 추출
-        summary = message.get("summary", "")
+        # analysis 객체에서 summary와 structuredData 추출
+        analysis = message.get("analysis", {})
+        summary = analysis.get("summary", "")
         
         # structuredData에서 emotion과 tags 추출
-        artifact = message.get("artifact", {})
-        structured_data = artifact.get("structuredData") or {}
+        structured_data = analysis.get("structuredData") or {}
         emotion = structured_data.get("emotion")
         tags = structured_data.get("tags")
         
@@ -311,6 +312,7 @@ class CallService:
         new_call = Call(
             vapi_call_id=vapi_call_id,
             elder_id=elder_id,
+            user_id=elder.user_id,  # ✨ 추가 - Elder에서 보호자 ID 가져오기
             started_at=started_at,
             ended_at=ended_at,
             status=status,
