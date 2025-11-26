@@ -4,7 +4,7 @@ pyjwt[crypto]
 httpx[http2]
 pydantic-settings
 python-dotenv
-aiosmtplib
+sendgrid
 apscheduler>=3.10.0
 vapi-server-sdk
 

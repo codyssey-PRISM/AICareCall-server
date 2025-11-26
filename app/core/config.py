@@ -31,11 +31,9 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite+aiosqlite:///./data/app.db"
     # PostgreSQL로 전환 시: postgresql+asyncpg://user:password@localhost/dbname
     
-    # Email (Gmail SMTP)
-    EMAIL_FROM: str
-    GMAIL_APP_PASSWORD: str
-    SMTP_SERVER: str = "smtp.gmail.com"
-    SMTP_PORT: int = 587
+    # Email (SendGrid)
+    EMAIL_FROM: str  # Single Sender 인증된 이메일 (예: "aicarecall.sms@gmail.com")
+    SENDGRID_API_KEY: str
 
     # Vapi
     VAPI_API_KEY: str
