@@ -42,51 +42,85 @@ class ElderService:
         Raises:
             ValueError: 보호자(User)가 존재하지 않을 경우
         """
-        # 0. 보호자 존재 여부 확인
-        user_result = await db.execute(
-            select(User).where(User.id == user_id)
-        )
-        user = user_result.scalar_one_or_none()
-        
-        if user is None:
-            raise ValueError(f"존재하지 않는 보호자입니다. (user_id: {user_id})")
-        
-        # 1. Elder 레코드 생성
-        new_elder = Elder(
-            user_id=user_id,
-            name=elder_data.name,
-            gender=elder_data.gender,
-            age=elder_data.age,
-            relation=elder_data.relation,
-            phone=elder_data.phone,
-            residence_type=elder_data.residence_type,
-            health_condition=elder_data.health_condition,
-            begin_date=elder_data.begin_date,
-            end_date=elder_data.end_date,
-            ask_meal=elder_data.ask_meal,
-            ask_medication=elder_data.ask_medication,
-            ask_emotion=elder_data.ask_emotion,
-            ask_special_event=elder_data.ask_special_event,
-            additional_info=elder_data.additional_info,
-            invite_code=ElderService._generate_invite_code(),
-        )
-        
-        db.add(new_elder)
-        await db.flush()  # elder.id 생성을 위해 flush
-        
-        # 2. CallSchedule 레코드들 생성 (CallScheduleService 사용)
-        from app.services.call_schedule import CallScheduleService
-        await CallScheduleService.create_schedules(
-            db=db,
-            elder_id=new_elder.id,
-            weekdays=elder_data.call_weekdays,
-            times=elder_data.call_times
-        )
-        
-        await db.commit()
-        await db.refresh(new_elder)
-        
-        return new_elder
+        try:
+            # 0. 보호자 존재 여부 확인
+            print(f"🔍 [Step 1] 보호자 존재 여부 확인 (user_id: {user_id})")
+            user_result = await db.execute(
+                select(User).where(User.id == user_id)
+            )
+            user = user_result.scalar_one_or_none()
+            
+            if user is None:
+                raise ValueError(f"존재하지 않는 보호자입니다. (user_id: {user_id})")
+            
+            print(f"✅ 보호자 확인 완료: {user.email}")
+            
+            # 1. Elder 레코드 생성
+            print(f"🔍 [Step 2] Elder 레코드 생성 시작")
+            invite_code = ElderService._generate_invite_code()
+            print(f"   생성된 초대 코드: {invite_code}")
+            
+            new_elder = Elder(
+                user_id=user_id,
+                name=elder_data.name,
+                gender=elder_data.gender,
+                age=elder_data.age,
+                relation=elder_data.relation,
+                phone=elder_data.phone,
+                residence_type=elder_data.residence_type,
+                health_condition=elder_data.health_condition,
+                begin_date=elder_data.begin_date,
+                end_date=elder_data.end_date,
+                ask_meal=elder_data.ask_meal,
+                ask_medication=elder_data.ask_medication,
+                ask_emotion=elder_data.ask_emotion,
+                ask_special_event=elder_data.ask_special_event,
+                additional_info=elder_data.additional_info,
+                invite_code=invite_code,
+            )
+            
+            db.add(new_elder)
+            print(f"🔍 [Step 3] DB flush 시작 (elder.id 생성)")
+            await db.flush()  # elder.id 생성을 위해 flush
+            print(f"✅ Elder 레코드 생성 완료 (elder_id: {new_elder.id})")
+            
+            # 2. CallSchedule 레코드들 생성 (CallScheduleService 사용)
+            print(f"🔍 [Step 4] CallSchedule 생성 시작")
+            print(f"   weekdays: {elder_data.call_weekdays}")
+            print(f"   times: {elder_data.call_times}")
+            
+            from app.services.call_schedule import CallScheduleService
+            await CallScheduleService.create_schedules(
+                db=db,
+                elder_id=new_elder.id,
+                weekdays=elder_data.call_weekdays,
+                times=elder_data.call_times
+            )
+            print(f"✅ CallSchedule 생성 완료")
+            
+            print(f"🔍 [Step 5] DB commit 시작")
+            await db.commit()
+            await db.refresh(new_elder)
+            print(f"✅ 최종 커밋 완료")
+            
+            return new_elder
+            
+        except ValueError:
+            # ValueError는 그대로 재발생
+            raise
+        except Exception as e:
+            # 다른 예외는 상세 로그 출력 후 재발생
+            print(f"❌ [ElderService] 예외 발생:")
+            print(f"   타입: {type(e).__name__}")
+            print(f"   메시지: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            
+            # 롤백 시도
+            await db.rollback()
+            print(f"🔄 DB 롤백 완료")
+            
+            raise
     
     @staticmethod
     async def get_elder_by_id(db: AsyncSession, elder_id: int) -> Elder | None:
