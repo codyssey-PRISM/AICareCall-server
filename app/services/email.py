@@ -12,6 +12,8 @@ async def send_auth_code_email(email: str, code: str) -> bool:
     """
     인증 코드 이메일 전송 (SendGrid API)
     
+    DEBUG=True일 때는 실제 전송 없이 콘솔에만 출력
+    
     Args:
         email: 수신자 이메일
         code: 6자리 인증 코드
@@ -20,6 +22,18 @@ async def send_auth_code_email(email: str, code: str) -> bool:
         bool: 전송 성공 여부
     """
     try:
+        # DEBUG 모드일 때는 콘솔에만 출력
+        if settings.DEBUG:
+            print("=" * 60)
+            print("🔍 [DEBUG MODE] 이메일 전송 스킵 (콘솔 출력만)")
+            print("=" * 60)
+            print(f"📧 To: {email}")
+            print(f"📝 Subject: [소리AI] 인증 코드: {code}")
+            print(f"🔑 인증 코드: {code}")
+            print("=" * 60)
+            return True
+        
+        # 프로덕션: 실제 SendGrid로 전송
         # HTML 템플릿 로드
         template_path = Path(__file__).parent.parent / "templates" / "auth_code_email.html"
         with open(template_path, "r", encoding="utf-8") as f:
