@@ -23,8 +23,8 @@ class Elder(Base):
     phone: Mapped[str] = mapped_column(String(15), nullable=False)
     residence_type: Mapped[str] = mapped_column(String(255), nullable=False)
     health_condition: Mapped[str] = mapped_column(String(511), nullable=False)
-    begin_date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    end_date: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    begin_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    end_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
     ask_meal: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     ask_medication: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     ask_emotion: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
@@ -32,9 +32,9 @@ class Elder(Base):
     additional_info: Mapped[str] = mapped_column(String(511), nullable=True)
     invite_code: Mapped[str] = mapped_column(String(6), nullable=False, index=True)
     voip_device_token: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, 
+        DateTime(timezone=True), 
         server_default=func.now(), 
         onupdate=func.now(), 
         nullable=False
