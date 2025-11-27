@@ -39,6 +39,9 @@ class Settings(BaseSettings):
     VAPI_API_KEY: str
     SERVER_URL: str
     
+    # Web Dashboard
+    WEB_URL: str = "https://ai-care-call-web.vercel.app"
+    
     @property
     def voip_topic(self) -> str:
         """VoIP 토픽 = Bundle ID + .voip"""

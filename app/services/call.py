@@ -2,7 +2,9 @@ from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.elder import ElderService
 from app.services.apns import APNsService
+from app.services.email import send_call_report_email
 from app.db.models.elder import Elder
+from app.db.models.user import User
 from app.db.models.call import Call
 from app.db.models.call_message import CallMessage
 from app.core.config import get_settings
@@ -357,5 +359,29 @@ class CallService:
         # 7. 커밋
         await db.commit()
         await db.refresh(new_call)
+        
+        # 8. 보호자에게 통화 리포트 이메일 발송
+        try:
+            user = await db.get(User, elder.user_id)
+            if user and user.email:
+                print(f"\n📧 보호자 이메일 발송 시작...")
+                print(f"   - 보호자 이메일: {user.email}")
+                print(f"   - 어르신 이름: {elder.name}")
+                print(f"   - Call ID: {new_call.id}")
+                
+                await send_call_report_email(
+                    email=user.email,
+                    elder_name=elder.name,
+                    call_id=new_call.id,
+                    elder_id=elder_id,
+                    summary=summary,
+                    emotion=emotion
+                )
+            else:
+                print(f"⚠️ 보호자 정보 없음 또는 이메일 없음 (user_id: {elder.user_id})")
+        except Exception as e:
+            # 이메일 발송 실패해도 통화 저장은 성공으로 처리
+            print(f"⚠️ 이메일 발송 중 오류 발생 (통화 저장은 완료됨)")
+            print(f"   Error: {e}")
         
         return new_call
