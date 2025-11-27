@@ -19,7 +19,7 @@ class CallMessage(Base):
     message: Mapped[str] = mapped_column(Text, nullable=False)
     
     # 타이밍
-    timestamp: Mapped[datetime] = mapped_column(DateTime, nullable=False)  # 실제 발화 시각
+    timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)  # 실제 발화 시각
     
     # Relationship
     call: Mapped["Call"] = relationship("Call", back_populates="messages")

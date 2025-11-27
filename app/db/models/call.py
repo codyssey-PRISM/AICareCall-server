@@ -21,8 +21,8 @@ class Call(Base):
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)  # ✨ 추가
     
     # 통화 시간 정보
-    started_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    ended_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    ended_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
     
     # 통화 상태 및 결과
     status: Mapped[str] = mapped_column(String(50), nullable=False)  # completed, failed, no_answer, busy
@@ -31,8 +31,8 @@ class Call(Base):
     tags: Mapped[list[str] | None] = mapped_column(JSON, nullable=True) 
     
     # 타임스탬프
-    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
     
     # Relationships
     messages: Mapped[list["CallMessage"]] = relationship("CallMessage", back_populates="call", cascade="all, delete-orphan")
