@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routers import push, webhook, health, elders, auth, elder_app, dashboard
+from app.routers import push, webhook, health, elders, auth, elder_app, dashboard, test
 from app.core.config import get_settings
 from app.db.base import Base
 from app.db.session import engine
@@ -18,6 +18,8 @@ app = FastAPI(
 origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://sori-call.vercel.app",
+    "https://aicarecall-web.vercel.app",
     # 배포 후 프론트 주소도 여기 추가
 ]
 
@@ -37,6 +39,7 @@ app.include_router(webhook.router)
 app.include_router(elders.router)
 app.include_router(elder_app.router)
 app.include_router(dashboard.router)
+app.include_router(test.router)
 
 
 # 서버 시작 시 로그
