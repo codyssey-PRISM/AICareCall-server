@@ -1,4 +1,5 @@
 """Elder 관련 API 라우터"""
+import traceback
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -25,22 +26,43 @@ async def create_elder(
         생성된 어르신 정보
     """
     try:
+        print("=" * 80)
+        print("🔍 [DEBUG] 어르신 등록 시작")
+        print(f"   user_id: {user_id}")
+        print(f"   elder_data: {elder_data.model_dump()}")
+        print("=" * 80)
+        
         elder = await ElderService.create_elder(
             db=db,
             user_id=user_id,
             elder_data=elder_data
         )
+        
+        print("✅ [SUCCESS] 어르신 등록 완료")
+        print(f"   elder_id: {elder.id}")
+        print("=" * 80)
+        
         return elder
     except ValueError as e:
         # 보호자가 존재하지 않는 경우
+        print(f"❌ [ERROR] ValueError 발생: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(e)
         )
     except Exception as e:
+        # 상세한 에러 정보 출력
+        print("=" * 80)
+        print("❌ [ERROR] 어르신 등록 중 예외 발생")
+        print(f"   에러 타입: {type(e).__name__}")
+        print(f"   에러 메시지: {str(e)}")
+        print("\n📋 상세 Traceback:")
+        traceback.print_exc()
+        print("=" * 80)
+        
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"어르신 등록 중 오류가 발생했습니다: {str(e)}"
+            detail=f"어르신 등록 중 오류가 발생했습니다: {type(e).__name__}: {str(e)}"
         )
 
 
