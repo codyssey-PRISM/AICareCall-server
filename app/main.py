@@ -19,8 +19,7 @@ origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "https://sori-call.vercel.app",
-    "https://aicarecall-web.vercel.app",
-    # 배포 후 프론트 주소도 여기 추가
+    "https://ai-care-call-web.vercel.app",  # 실제 배포 URL
 ]
 
 app.add_middleware(
