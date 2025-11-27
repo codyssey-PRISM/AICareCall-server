@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>소리AI 통화 리포트</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+          "Helvetica", "Arial", sans-serif;
+        background-color: #f5f5f5;
+      }
+      .container {
+        max-width: 600px;
+        margin: 40px auto;
+        background-color: #ffffff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 40px 20px;
+        text-align: center;
+        color: white;
+      }
+      .header h1 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 600;
+      }
+      .header p {
+        margin: 10px 0 0 0;
+        font-size: 16px;
+        opacity: 0.9;
+      }
+      .content {
+        padding: 40px 30px;
+      }
+      .content p {
+        color: #666;
+        font-size: 16px;
+        line-height: 1.6;
+        margin: 0 0 20px 0;
+      }
+      .info-box {
+        background-color: #f8f9fa;
+        border-left: 4px solid #667eea;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+      }
+      .info-row {
+        display: flex;
+        margin-bottom: 12px;
+        font-size: 15px;
+      }
+      .info-row:last-child {
+        margin-bottom: 0;
+      }
+      .info-label {
+        color: #888;
+        font-weight: 600;
+        min-width: 80px;
+      }
+      .info-value {
+        color: #333;
+        flex: 1;
+      }
+      .emotion {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .emotion.calm {
+        background-color: #d4edda;
+        color: #155724;
+      }
+      .emotion.happy {
+        background-color: #fff3cd;
+        color: #856404;
+      }
+      .emotion.sad {
+        background-color: #cce5ff;
+        color: #004085;
+      }
+      .emotion.anxious {
+        background-color: #f8d7da;
+        color: #721c24;
+      }
+      .emotion.neutral {
+        background-color: #e2e3e5;
+        color: #383d41;
+      }
+      .summary {
+        background-color: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+        color: #333;
+        line-height: 1.8;
+        font-size: 15px;
+      }
+      .buttons {
+        display: flex;
+        gap: 12px;
+        margin: 30px 0;
+      }
+      .button {
+        flex: 1;
+        display: inline-block;
+        padding: 14px 24px;
+        text-align: center;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 15px;
+        transition: all 0.2s;
+      }
+      .button-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+      .button-secondary {
+        background-color: #f8f9fa;
+        color: #667eea;
+        border: 2px solid #667eea;
+      }
+      .footer {
+        padding: 30px;
+        background-color: #f8f9fa;
+        text-align: center;
+        color: #999;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      .footer p {
+        margin: 5px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>📞 통화 리포트</h1>
+        <p>{{ELDER_NAME}}님과의 통화가 완료되었습니다</p>
+      </div>
+      <div class="content">
+        <p>
+          안녕하세요!<br />오늘 {{ELDER_NAME}}님과의 AI 안부 통화가
+          완료되었습니다.
+        </p>
+
+        <div class="info-box">
+          <div class="info-row">
+            <span class="info-label">어르신</span>
+            <span class="info-value">{{ELDER_NAME}}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">감정 상태</span>
+            <span class="info-value">
+              <span class="emotion {{EMOTION_CLASS}}">{{EMOTION_TEXT}}</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="summary">
+          <strong>📝 통화 요약</strong><br /><br />
+          {{SUMMARY}}
+        </div>
+
+        <div class="buttons">
+          <a href="{{CALL_DETAIL_URL}}" class="button button-primary">
+            통화 상세 보기
+          </a>
+          <a href="{{DASHBOARD_URL}}" class="button button-secondary">
+            대시보드
+          </a>
+        </div>
+
+        <p style="color: #999; font-size: 14px; text-align: center">
+          버튼을 눌러 자세한 통화 내용과 대화 기록을 확인하세요.
+        </p>
+      </div>
+      <div class="footer">
+        <p>이 이메일은 자동으로 발송되었습니다.</p>
+        <p>문의사항이 있으시면 언제든 연락 주세요.</p>
+        <p style="margin-top: 20px">© 2025 소리AI. All rights reserved.</p>
+      </div>
+    </div>
+  </body>
+</html>
