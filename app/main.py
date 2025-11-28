@@ -20,6 +20,8 @@ origins = [
     "http://127.0.0.1:3000",
     "https://sori-call.vercel.app",
     "https://ai-care-call-web.vercel.app",  # 실제 배포 URL
+    "https://sori-ai.vercel.app"
+    "https://sori-ai-prism.vercel.app"
 ]
 
 app.add_middleware(
