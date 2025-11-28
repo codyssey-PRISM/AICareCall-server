@@ -84,6 +84,7 @@ KEY_ID=your_key_id
 BUNDLE_ID=your_bundle_id
 P8_PRIVATE_KEY_PATH=your_p8_private_key_path
 
+
 # 디바이스 토큰 (개발용)
 DEVICE_TOKEN=your_actual_device_token
 VOIP_DEVICE_TOKEN=your_actual_voip_token
@@ -101,6 +102,7 @@ EMAIL_FROM=your-email@gmail.com
 GMAIL_APP_PASSWORD=your_gmail_app_password
 SMTP_SERVER=smtp.gmail.com
 SMTP_PORT=587
+
 
 # Sendgrid
 SENDGRID_API_KEY=your_api_key
