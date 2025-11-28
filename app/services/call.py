@@ -67,9 +67,8 @@ class CallService:
 
         assistant = {
             "voice": {
-                "provider": "openai",
-                "voiceId": "echo",
-                "model": "tts-1"
+                "voiceId": "Spencer",
+                "provider": "vapi"
             },
             "model": {
                 "provider": "openai",
