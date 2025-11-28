@@ -79,10 +79,10 @@ cp .env.example .env
 
 ```env
 # Apple APNs
-TEAM_ID=U77SWC9NZT
-KEY_ID=5XFZZ6ZD2H
-BUNDLE_ID=com.stevenkim.CallClient
-P8_PRIVATE_KEY_PATH=AuthKey_5XFZZ6ZD2H.p8
+TEAM_ID=your_team_id
+KEY_ID=your_key_id
+BUNDLE_ID=your_bundle_id
+P8_PRIVATE_KEY_PATH=your_p8_private_key_path
 
 # 디바이스 토큰 (개발용)
 DEVICE_TOKEN=your_actual_device_token
@@ -101,6 +101,13 @@ EMAIL_FROM=your-email@gmail.com
 GMAIL_APP_PASSWORD=your_gmail_app_password
 SMTP_SERVER=smtp.gmail.com
 SMTP_PORT=587
+
+# Sendgrid
+SENDGRID_API_KEY=your_api_key
+
+# Vapi
+VAPI_API_KEY=your_api_key
+SERVER_URL=your_server_url # vapi webhook용
 
 # 서버 설정
 DEBUG=True
